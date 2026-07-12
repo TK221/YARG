@@ -124,8 +124,10 @@ namespace YARG.Menu.MusicLibrary
         private SongEntry _voteSong;
         private bool _voteInputsActive;
         private bool _resolvingSongVote;
+        private bool _startingVotedSong;
 
-        public bool IsSongVotingActive => IsSongVoteInputActive();
+        public bool IsSongVotingActive => !_startingVotedSong &&
+            (IsSongVoteInputActive() || IsSongVoteResolutionActive());
 
         public static void NeedsReload()
         {
@@ -157,6 +159,7 @@ namespace YARG.Menu.MusicLibrary
 
             _heldInputs.Clear();
             _resolvingSongVote = false;
+            _startingVotedSong = false;
 
             // Hack to ensure that crowd samples are stopped no matter what
             GlobalAudioHandler.StopAllSfxChannels();
@@ -301,6 +304,13 @@ namespace YARG.Menu.MusicLibrary
             if (reset)
             {
                 Navigator.Instance.PopScheme();
+            }
+
+            if (_resolvingSongVote)
+            {
+                // Keep the proposed song stable while the mixed-vote roulette resolves.
+                Navigator.Instance.PushScheme(new NavigationScheme(new List<NavigationScheme.Entry>(), false, true));
+                return;
             }
 
             bool isSelectingPlaylist = MenuState == MenuState.PlaylistSelect;
@@ -836,7 +846,9 @@ namespace YARG.Menu.MusicLibrary
             SetSidebarDifficultiesVisible(false);
             _heldInputs.Clear();
             _resolvingSongVote = false;
+            _startingVotedSong = false;
             _voteInputsActive = false;
+            _songVoteStrip?.CancelAnimations();
             _songVoteStrip?.Render(_songVotes, false);
 
             if (Navigator.Instance == null) return;
@@ -1023,16 +1035,43 @@ namespace YARG.Menu.MusicLibrary
 
         private bool IsSongVoteInputActive()
         {
-            return LibraryMode == MusicLibraryMode.QuickPlay &&
+            return IsSongVotingEnabled() &&
+                LibraryMode == MusicLibraryMode.QuickPlay &&
                 MenuState == MenuState.Library &&
                 CurrentSelection is SongViewType &&
                 _songVotes is { PlayerCount: > 1 } &&
                 !_resolvingSongVote;
         }
 
+        private bool IsSongVoteResolutionActive()
+        {
+            return IsSongVotingEnabled() &&
+                LibraryMode == MusicLibraryMode.QuickPlay &&
+                MenuState == MenuState.Library &&
+                CurrentSelection is SongViewType &&
+                _songVotes is { PlayerCount: > 1 } &&
+                _resolvingSongVote;
+        }
+
+        private static bool IsSongVotingEnabled()
+        {
+            return SettingsManager.Settings is not null && SettingsManager.Settings.EnableSongVoting.Value;
+        }
+
+        public void OnSongVotingSettingChanged()
+        {
+            if (isActiveAndEnabled)
+            {
+                ResetSongVotes();
+            }
+        }
+
         private void ResetSongVotes(bool refreshNavigation = true)
         {
+            bool wasResolvingSongVote = _resolvingSongVote;
             _resolvingSongVote = false;
+            _startingVotedSong = false;
+            _songVoteStrip.CancelAnimations();
             _songVotes.Reset(PlayerContainer.Players);
             _voteSong = (CurrentSelection as SongViewType)?.SongEntry;
             _songVoteStrip.Render(_songVotes, IsSongVoteInputActive());
@@ -1043,7 +1082,7 @@ namespace YARG.Menu.MusicLibrary
             }
 
             bool voteInputsActive = IsSongVoteInputActive();
-            if (_voteInputsActive != voteInputsActive)
+            if (wasResolvingSongVote || _voteInputsActive != voteInputsActive)
             {
                 _voteInputsActive = voteInputsActive;
                 SetNavigationScheme(true);
@@ -1074,18 +1113,48 @@ namespace YARG.Menu.MusicLibrary
             }
 
             _resolvingSongVote = true;
-            bool shouldPlay = _songVotes.ApproveCount == _songVotes.PlayerCount ||
-                (_songVotes.ApproveCount > 0 &&
-                    Random.value < (float) _songVotes.ApproveCount / _songVotes.PlayerCount);
+            if (_songVotes.ApproveCount == _songVotes.PlayerCount)
+            {
+                LaunchSelectedVotedSong();
+                return;
+            }
+
+            if (_songVotes.ApproveCount == 0)
+            {
+                SelectAnotherSongForVote();
+                return;
+            }
+
+            float roll = Random.value;
+            bool shouldPlay = roll < (float) _songVotes.ApproveCount / _songVotes.PlayerCount;
+            _voteInputsActive = false;
+            SetNavigationScheme(true);
+            _songVoteStrip.ShowMixedResult(_songVotes, roll, shouldPlay,
+                () => ResolveMixedSongVote(shouldPlay));
+        }
+
+        private void ResolveMixedSongVote(bool shouldPlay)
+        {
+            if (!isActiveAndEnabled || !_resolvingSongVote ||
+                (CurrentSelection as SongViewType)?.SongEntry != _voteSong)
+            {
+                return;
+            }
 
             if (shouldPlay)
             {
-                _songVoteStrip.Render(_songVotes, false);
-                CurrentSelection?.PrimaryButtonClick();
+                LaunchSelectedVotedSong();
                 return;
             }
 
             SelectAnotherSongForVote();
+        }
+
+        private void LaunchSelectedVotedSong()
+        {
+            _startingVotedSong = true;
+            _songVoteStrip.Render(_songVotes, false);
+            CurrentSelection?.PrimaryButtonClick();
         }
 
         private void SelectAnotherSongForVote()

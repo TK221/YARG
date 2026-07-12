@@ -145,6 +145,12 @@ namespace YARG.Settings
 
             public ToggleSetting LearningGuides { get; } = new(false);
 
+            public ToggleSetting EnableSongVoting { get; } = new(false, _ =>
+            {
+                var library = Object.FindFirstObjectByType<MusicLibraryMenu>();
+                library?.OnSongVotingSettingChanged();
+            });
+
             public SliderSetting ShowCursorTimer      { get; } = new(2f, 0f, 5f);
 
             public ToggleSetting PauseOnDeviceDisconnect { get; } = new(true);

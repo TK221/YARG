@@ -50,6 +50,7 @@ namespace YARG.Settings
                 new FieldMetadata(nameof(Settings.PracticeRestartDelay), isAdvanced: true),
                 nameof(Settings.NoFail),
                 nameof(Settings.LearningGuides),
+                nameof(Settings.EnableSongVoting),
                 new FieldMetadata(nameof(Settings.ReduceNoteSpeedByDifficulty)),
 
                 new HeaderMetadata("StatusBar"),
