@@ -441,6 +441,13 @@ namespace YARG.Menu.MusicLibrary
 
         public void UpdatePlayButtonLabel(bool setListNotEmpty)
         {
+            if (_musicLibraryMenu.IsSongVotingActive)
+            {
+                // The sidebar button has no associated player, so it cannot cast a fair multiplayer vote.
+                _playButton.DisableButton();
+                return;
+            }
+
             string key;
             bool enableButton;
             Action<NavigationContext> holdHandler = null;
