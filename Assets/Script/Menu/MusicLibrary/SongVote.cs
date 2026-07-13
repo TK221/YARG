@@ -98,6 +98,11 @@ namespace YARG.Menu.MusicLibrary
     /// </summary>
     public sealed class SongVoteStrip : MonoBehaviour
     {
+        // Timing knobs for the mixed-vote roulette.
+        private const float RouletteTurns = 4f;
+        private const float RouletteDurationSeconds = 1;
+        private const float ResultDisplayDurationSeconds = 1f;
+
         private sealed class VoteChip
         {
             public GameObject Root;
@@ -213,9 +218,8 @@ namespace YARG.Menu.MusicLibrary
             SetOdds(chance);
             SetOddsMarker(0.5f);
 
-            const float TURNS = 3f;
             _resultSequence = DOTween.Sequence(_root)
-                .Append(DOVirtual.Float(0f, TURNS + roll, 0.9f,
+                .Append(DOVirtual.Float(0f, RouletteTurns + roll, RouletteDurationSeconds,
                     value => SetOddsMarker(Mathf.Repeat(value, 1f))).SetEase(Ease.OutCubic))
                 .AppendCallback(() =>
                 {
@@ -224,7 +228,7 @@ namespace YARG.Menu.MusicLibrary
                         ? "Menu.MusicLibrary.SongVote.Play"
                         : "Menu.MusicLibrary.SongVote.Skip");
                 })
-                .AppendInterval(0.35f)
+                .AppendInterval(ResultDisplayDurationSeconds)
                 .AppendCallback(() =>
                 {
                     _resultOverlay.SetActive(false);
