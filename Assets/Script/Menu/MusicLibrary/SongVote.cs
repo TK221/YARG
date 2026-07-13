@@ -35,11 +35,14 @@ namespace YARG.Menu.MusicLibrary
     /// </summary>
     public sealed class SongVoteSession
     {
+        private const float VoteChangeCooldownSeconds = 0.35f;
+
         private sealed class Voter
         {
             public Guid Id;
             public string Name;
             public SongVote Vote;
+            public float LastVoteChangeTime;
         }
 
         private readonly List<Voter> _voters = new();
@@ -69,12 +72,13 @@ namespace YARG.Menu.MusicLibrary
                 {
                     Id = profile.Id,
                     Name = profile.Name,
-                    Vote = SongVote.Pending
+                    Vote = SongVote.Pending,
+                    LastVoteChangeTime = float.NegativeInfinity
                 });
             }
         }
 
-        public bool TryVote(YargPlayer player, SongVote vote)
+        public bool TryVote(YargPlayer player, SongVote vote, float currentTime)
         {
             if (player?.Profile is null || vote == SongVote.Pending)
             {
@@ -82,12 +86,19 @@ namespace YARG.Menu.MusicLibrary
             }
 
             var voter = _voters.FirstOrDefault(candidate => candidate.Id == player.Profile.Id);
-            if (voter is null || voter.Vote != SongVote.Pending)
+            if (voter is null || voter.Vote == vote)
+            {
+                return false;
+            }
+
+            // A player may reconsider, but rapid alternating button presses should not animate or affect the vote.
+            if (voter.Vote != SongVote.Pending && currentTime - voter.LastVoteChangeTime < VoteChangeCooldownSeconds)
             {
                 return false;
             }
 
             voter.Vote = vote;
+            voter.LastVoteChangeTime = currentTime;
             return true;
         }
     }

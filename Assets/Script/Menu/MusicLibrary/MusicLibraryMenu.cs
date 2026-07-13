@@ -1101,7 +1101,7 @@ namespace YARG.Menu.MusicLibrary
 
         private void VoteOnSong(YargPlayer player, SongVote vote)
         {
-            if (!IsSongVoteInputActive() || !_songVotes.TryVote(player, vote))
+            if (!IsSongVoteInputActive() || !_songVotes.TryVote(player, vote, Time.unscaledTime))
             {
                 return;
             }
