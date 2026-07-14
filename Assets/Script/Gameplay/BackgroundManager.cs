@@ -714,7 +714,18 @@ namespace YARG.Gameplay
                 return await handle.Task;
             }
 
-            return await GetAddressableCharacter(gender);
+            // If there is a specified vocal gender, get a remote character meeting that criteria
+            if (gender is not VocalGender.Unspecified)
+            {
+                var character = await GetAddressableCharacter(gender);
+                if (character != null)
+                {
+                    return character;
+                }
+            }
+
+            // Hint failed, attempt to load user's custom character
+            return await GetCustomCharacterFromBundle();
         }
 
         private async UniTask<GameObject> GetAddressableCharacter(VocalGender gender)
@@ -736,10 +747,10 @@ namespace YARG.Gameplay
             GameObject character = null;
             var venueKeys = await Addressables.LoadResourceLocationsAsync(labelGroup, Addressables.MergeMode.Intersection);
 
-            // In case we don't find a character, try without gender
+            // If we didn't find a character with the required gender, let the caller deal with it
             if (venueKeys.Count == 0)
             {
-                venueKeys = await Addressables.LoadResourceLocationsAsync(typeLabel);
+                return null;
             }
 
             if (venueKeys.Count > 0)
