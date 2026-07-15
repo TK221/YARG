@@ -135,6 +135,7 @@ namespace YARG.Menu.MusicLibrary
         private static readonly Color PendingColor = new(0.12f, 0.16f, 0.25f, 0.96f);
         private static readonly Color ApproveColor = new(0.08f, 0.38f, 0.22f, 0.98f);
         private static readonly Color DenyColor = new(0.46f, 0.12f, 0.16f, 0.98f);
+        private static readonly Color PanelOutlineColor = new(0.34f, 0.49f, 0.64f, 0.22f);
 
         private GameObject _root;
         private Image _background;
@@ -169,6 +170,11 @@ namespace YARG.Menu.MusicLibrary
             _background = _root.GetComponent<Image>();
             _background.color = new Color(0.025f, 0.045f, 0.085f, 0.96f);
             _background.raycastTarget = false;
+
+            var outline = _root.AddComponent<Outline>();
+            outline.effectColor = PanelOutlineColor;
+            outline.effectDistance = Vector2.one;
+            outline.useGraphicAlpha = true;
 
             _title = CreateText("Title", _root.transform, 21f, FontStyles.Bold, TextAlignmentOptions.Left);
             SetAnchors(_title.rectTransform, new Vector2(0f, 0.70f), new Vector2(0.28f, 1f),
