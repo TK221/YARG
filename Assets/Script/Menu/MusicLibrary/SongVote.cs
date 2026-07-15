@@ -260,6 +260,13 @@ namespace YARG.Menu.MusicLibrary
             _resultSequence?.Kill();
             _resultSequence = null;
 
+            foreach (var chip in _chips)
+            {
+                var chipTransform = chip.Root.transform;
+                chipTransform.DOKill();
+                chipTransform.localScale = Vector3.one;
+            }
+
             if (_resultOverlay != null)
             {
                 _resultOverlay.SetActive(false);
@@ -343,13 +350,16 @@ namespace YARG.Menu.MusicLibrary
             };
 
             chip.Background.DOKill();
-            chip.Root.transform.DOKill();
+            var chipTransform = chip.Root.transform;
+            chipTransform.DOKill();
+            chipTransform.localScale = Vector3.one;
             chip.Background.DOColor(color, 0.14f).SetUpdate(true);
             chip.State.text = Localize.Key(key);
 
             if (vote != SongVote.Pending)
             {
-                chip.Root.transform.DOPunchScale(new Vector3(0.06f, 0.06f, 0f), 0.24f, 5, 0.55f)
+                chipTransform.DOPunchScale(new Vector3(0.06f, 0.06f, 0f), 0.24f, 5, 0.55f)
+                    .OnComplete(() => chipTransform.localScale = Vector3.one)
                     .SetUpdate(true);
             }
         }
