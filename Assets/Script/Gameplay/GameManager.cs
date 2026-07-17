@@ -19,6 +19,7 @@ using YARG.Gameplay.Visuals;
 using YARG.Input;
 using YARG.Integration;
 using YARG.Localization;
+using YARG.Menu.MusicLibrary;
 using YARG.Menu.Navigation;
 using YARG.Menu.Persistent;
 using YARG.Menu.ScoreScreen;
@@ -764,6 +765,7 @@ namespace YARG.Gameplay
 
         public void ForceQuitSong()
         {
+            MusicLibraryMenu.RequestRandomSongForVoting();
             GlobalVariables.State = PersistentState.Default;
             GlobalVariables.Instance.LoadScene(SceneIndex.Menu);
         }

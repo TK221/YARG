@@ -425,6 +425,7 @@ namespace YARG.Menu.ScoreScreen
                         }
                         else
                         {
+                            MusicLibraryMenu.RequestRandomSongForVoting();
                             GlobalVariables.State.PlayingAShow = false;
                             GlobalVariables.Instance.LoadScene(SceneIndex.Menu);
                         }
@@ -433,6 +434,7 @@ namespace YARG.Menu.ScoreScreen
 
             _endEarlyButtonEntry = new NavigationScheme.Entry(MenuAction.Red, "Menu.ScoreScreen.EndSetlistEarly", () =>
             {
+                MusicLibraryMenu.RequestRandomSongForVoting();
                 GlobalVariables.State.PlayingAShow = false;
                 GlobalVariables.Instance.LoadScene(SceneIndex.Menu);
             });

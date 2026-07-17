@@ -65,6 +65,7 @@ namespace YARG.Menu.MusicLibrary
         private static bool                    _hasSavedSelectionSnapshot;
         private static bool                    _forceGoToCurrentlyPlaying;
         private static SongEntry               _forceGoToSong;
+        private static bool                    _selectRandomSongForVotingOnEnable;
         private static int                     _mainLibraryIndex = -1;
         private static MusicLibraryReloadState _reloadState = MusicLibraryReloadState.Full;
         private static Playlist                _savedPlaylist;
@@ -81,6 +82,14 @@ namespace YARG.Menu.MusicLibrary
             CurrentlyPlaying = song;
             _forceGoToCurrentlyPlaying = song != null;
             _forceGoToSong = song;
+        }
+
+        /// <summary>
+        /// Chooses a fresh song proposal when Quick Play next opens, if song voting is enabled there.
+        /// </summary>
+        public static void RequestRandomSongForVoting()
+        {
+            _selectRandomSongForVotingOnEnable = true;
         }
 
         [Space]
@@ -223,6 +232,14 @@ namespace YARG.Menu.MusicLibrary
                 TrySelectCurrentSongPreferNaturalLocation(_forceGoToSong ?? _currentSong);
                 _forceGoToCurrentlyPlaying = false;
                 _forceGoToSong = null;
+            }
+
+            bool selectRandomSongForVoting = _selectRandomSongForVotingOnEnable;
+            _selectRandomSongForVotingOnEnable = false;
+            if (selectRandomSongForVoting && IsSongVotingEnabled() &&
+                LibraryMode == MusicLibraryMode.QuickPlay && MenuState == MenuState.Library && !PlaylistMode)
+            {
+                SelectRandomSong();
             }
 
             CurrentlyPlaying = null;

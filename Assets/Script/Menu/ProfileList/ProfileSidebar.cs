@@ -82,6 +82,8 @@ namespace YARG.Menu.ProfileList
         [SerializeField]
         private Toggle _useCymbalModelsToggle;
         [SerializeField]
+        private Toggle _songVotingToggle;
+        [SerializeField]
         private TMP_Dropdown _starPowerActivationTypeDropdown;
         [SerializeField]
         private TMP_Dropdown _engineDropdown;
@@ -136,6 +138,12 @@ namespace YARG.Menu.ProfileList
 
                 // Create the dropdown option
                 _gameModeDropdown.options.Add(new(gameMode.ToLocalizedName()));
+            }
+
+            if (_songVotingToggle != null)
+            {
+                _songVotingToggle.onValueChanged.RemoveAllListeners();
+                _songVotingToggle.onValueChanged.AddListener(_ => ChangeSongVotingParticipation());
             }
         }
 
@@ -251,6 +259,7 @@ namespace YARG.Menu.ProfileList
             _rangeDisabledToggle.isOn = profile.RangeEnabled;
             _openLaneDisplayTypeDropdown.value = _openLaneDisplayTypesByIndex.IndexOf(profile.OpenLaneDisplayType);
             _useCymbalModelsToggle.isOn = profile.UseCymbalModels;
+            _songVotingToggle?.SetIsOnWithoutNotify(profile.ParticipateInSongVoting);
             
             // Update preset dropdowns
             _engineDropdown.SetValueWithoutNotify(
@@ -436,6 +445,14 @@ namespace YARG.Menu.ProfileList
         public void ChangeUseCymbalModels()
         {
             _profile.UseCymbalModels = _useCymbalModelsToggle.isOn;
+        }
+
+        public void ChangeSongVotingParticipation()
+        {
+            if (_profile != null && _songVotingToggle != null)
+            {
+                _profile.ParticipateInSongVoting = _songVotingToggle.isOn;
+            }
         }
 
         public void ChangeEngine()

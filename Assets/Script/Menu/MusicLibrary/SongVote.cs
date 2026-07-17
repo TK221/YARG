@@ -63,7 +63,7 @@ namespace YARG.Menu.MusicLibrary
             foreach (var player in players)
             {
                 // Bots cannot provide menu input, so including them would leave a vote permanently pending.
-                if (player?.Profile is not { IsBot: false } profile)
+                if (player?.Profile is not { IsBot: false, ParticipateInSongVoting: true } profile)
                 {
                     continue;
                 }
