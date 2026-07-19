@@ -1,3 +1,5 @@
 [submodule "Assets/Plugins/YARG.Core"]
 	path = YARG.Core
-	url = https://github.com/YARC-Official/YARG.Core
+	url = https://github.com/TK221/YARG.Core.git
+[submodule "YARG.Core"]
+	branch = mycustom
