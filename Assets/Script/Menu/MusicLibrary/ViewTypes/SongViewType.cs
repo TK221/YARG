@@ -148,6 +148,12 @@ namespace YARG.Menu.MusicLibrary
 
         public override void PrimaryButtonClick()
         {
+            // Pointer clicks do not identify a player. Keep them from bypassing an active local vote.
+            if (_musicLibrary.IsSongVotingActive)
+            {
+                return;
+            }
+
             base.PrimaryButtonClick();
 
             if (PlayerContainer.Players.Count <= 0)

@@ -43,6 +43,7 @@ namespace YARG.Helpers.Extensions
                 (ProfileSettingStrings.ENGINE_PRESET, null),
                 (ProfileSettingStrings.ROCK_METER_PRESET, null),
                 (ProfileSettingStrings.INPUT_CALIBRATION, null),
+                (ProfileSettingStrings.SONG_VOTING, null),
             };
 
             List<(string setting, string? overrideText)> unconditionallyValidInAllModesExceptVocals = new()

@@ -347,6 +347,20 @@
             },
             "Back": "BACK",
             "NoPlayersConnected": "No players connected! Go to the profiles menu to connect a player.",
+            "SongVote": {
+                "Title": "SONG VOTE",
+                "Instructions": "GREEN: approve   RED: decline   SELECT: back",
+                "Approve": "Approve",
+                "Deny": "Decline",
+                "Progress": "{0} of {1} players have voted",
+                "Chance": "{0}% chance to play",
+                "Waiting": "Waiting for vote",
+                "Approved": "Approved",
+                "Declined": "Declined",
+                "Rolling": "ROLLING THE ODDS...",
+                "Play": "PLAY!",
+                "Skip": "SKIP!"
+            },
             "Play": "Play Song",
             "PlayHoldAddToSet": "<align=left>Play Song<br><size=67%>(Hold) Add To Setlist</size></align>",
             "AddHoldStartSet": "<align=left>Add to Setlist<br><size=67%>(Hold) Start The Set</size></align>",
@@ -1176,6 +1190,10 @@
             "EnablePracticeSP": {
                 "Name": "Star Power in Practice",
                 "Description": "Allow Star Power phrases while in Practice Mode."
+            },
+            "EnableSongVoting": {
+                "Name": "Quick Play Song Voting",
+                "Description": "Require each connected player to approve or decline a selected Quick Play song."
             },
             "FpsCap": {
                 "Name": "FPS Cap",

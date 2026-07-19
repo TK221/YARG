@@ -61,11 +61,21 @@ namespace YARG.Menu.Main
         public void CurrentlyPlaying()
         {
             MusicLibraryMenu.RequestGoToCurrentlyPlaying(MusicPlayer.NowPlaying);
-            QuickPlay();
+            OpenQuickPlay(selectRandomSongForVoting: false);
         }
 
         public void QuickPlay()
         {
+            OpenQuickPlay(selectRandomSongForVoting: true);
+        }
+
+        private void OpenQuickPlay(bool selectRandomSongForVoting)
+        {
+            if (selectRandomSongForVoting)
+            {
+                MusicLibraryMenu.RequestRandomSongForVoting();
+            }
+
             var menu = MenuManager.Instance.PushMenu(MenuManager.Menu.MusicLibrary, false);
 
             MusicLibraryMenu.LibraryMode = MusicLibraryMode.QuickPlay;

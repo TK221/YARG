@@ -18,6 +18,7 @@ namespace YARG.Assets.Script.Helpers
         public const string ROCK_METER_PRESET = "Rock Meter Preset";
         public const string INPUT_CALIBRATION = "Input Calibration";
         public const string NOTE_SPEED_AND_HIGHWAY_LENGTH = "Note Speed and Highway Length";
+        public const string SONG_VOTING = "Song Voting";
 
         // GameMode-specific
         public const string LEFTY_FLIP                              = "Lefty Flip";
