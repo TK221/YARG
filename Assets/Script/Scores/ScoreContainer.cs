@@ -429,6 +429,19 @@ namespace YARG.Scores
             }
         }
 
+        public static int GetSongPlaycount(HashWrapper songChecksum)
+        {
+            try
+            {
+                return _db.QuerySongPlaycount(songChecksum);
+            }
+            catch (Exception e)
+            {
+                YargLogger.LogException(e, "Failed to load song play count from database.");
+                return 0;
+            }
+        }
+
         public static Dictionary<HashWrapper, StarAmount> GetBestStarsForSong(YargProfile profile)
         {
             try
