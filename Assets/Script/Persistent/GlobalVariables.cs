@@ -192,7 +192,10 @@ namespace YARG
             CancelInvoke(nameof(SaveVolumeShortcutSettings));
             Invoke(nameof(SaveVolumeShortcutSettings), VOLUME_SHORTCUT_SAVE_DELAY);
 
-            ToastManager.ToastInformation(Localize.KeyFormat("Menu.Toast.MasterVolume", Localize.Percent(volume)));
+            ToastManager.ToastInformation(
+                Localize.KeyFormat("Menu.Toast.MasterVolume", Localize.Percent(volume)),
+                replacementKey: "MasterVolume"
+            );
         }
 
         private void SaveVolumeShortcutSettings()
