@@ -453,6 +453,16 @@ namespace YARG.Scores
             );
         }
 
+        public int QuerySongPlaycount(HashWrapper songChecksum)
+        {
+            return _db.Query<PlayCountRecord>(
+                @"SELECT COUNT(Id) AS Count FROM GameRecords
+                WHERE SongChecksum = ?
+                    AND PlayedWithReplay = 0",
+                songChecksum.HashBytes
+            ).First().Count;
+        }
+
         public List<PlayerScoreWithChecksum> QueryPlayerBestStars(YargProfile profile, bool highestDifficultyOnly)
         {
             string difficultyFilter = highestDifficultyOnly ? "" : " AND ps.Difficulty = ?";

@@ -26,6 +26,8 @@ namespace YARG.Menu.MusicLibrary
         private Transform _difficultyRingsBottomContainer;
 
         [SerializeField]
+        private TextMeshProUGUI _timesPlayed;
+        [SerializeField]
         private TextMeshProUGUI _album;
         [SerializeField]
         private TextMeshProUGUI _source;
@@ -58,6 +60,8 @@ namespace YARG.Menu.MusicLibrary
         private GameObject _sidebarContents;
         [SerializeField]
         private GameObject _difficultiesDisplay;
+        [SerializeField]
+        private GameObject _timesPlayedContainer;
         [SerializeField]
         private GameObject _albumTitleContainer;
         [SerializeField]
@@ -208,6 +212,8 @@ namespace YARG.Menu.MusicLibrary
             _playButton.DisableButton();
             _favoriteButton.DisableButton();
 
+            _timesPlayed.text = string.Empty;
+
             _year.text = string.Empty;
             _length.text = string.Empty;
 
@@ -217,6 +223,7 @@ namespace YARG.Menu.MusicLibrary
             _subgenre.text = string.Empty;
 
             _albumTitleContainer.SetActive(false);
+            _timesPlayedContainer.SetActive(false);
             _sourceContainer.SetActive(false);
             _genreContainer.SetActive(false);
             _charterContainer.SetActive(false);
@@ -228,6 +235,8 @@ namespace YARG.Menu.MusicLibrary
             var songEntry = songViewType.SongEntry;
 
             SetWrappedText(_albumTitleContainer, _album, songEntry.Album, ref _albumBaseFontSize);
+            _timesPlayed.text = YARG.Scores.ScoreContainer.GetSongPlaycount(songEntry.Hash).ToString() + " Plays";
+            _timesPlayedContainer.SetActive(true);
             SetWrappedText(_sourceContainer, _source, SongSources.SourceToGameName(songEntry.Source), ref _sourceBaseFontSize);
             SetWrappedText(_charterContainer, _charter, songEntry.Charter, ref _charterBaseFontSize);
 
