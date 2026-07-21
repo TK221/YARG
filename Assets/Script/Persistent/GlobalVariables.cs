@@ -6,11 +6,13 @@ using UnityEngine.SceneManagement;
 using YARG.Audio.BASS;
 using YARG.Core.Logging;
 using YARG.Core.Audio;
+using YARG.Core.Input;
 using YARG.Helpers;
 using YARG.Input;
 using YARG.Integration;
 using YARG.Localization;
 using YARG.Menu.Navigation;
+using YARG.Menu.Persistent;
 using YARG.Player;
 using YARG.Playlists;
 using YARG.Replays;
@@ -47,6 +49,12 @@ namespace YARG
 
         private float _nextLocalizationUpdate;
         private const float LOCALIZATION_UPDATE_INTERVAL = 1800f;
+
+        private const float VOLUME_SHORTCUT_STEP = 0.05f;
+        private const float VOLUME_SHORTCUT_COOLDOWN = 0.12f;
+        private const float VOLUME_SHORTCUT_SAVE_DELAY = 1f;
+
+        private float _nextVolumeShortcutTime;
 
         protected override void SingletonAwake()
         {
@@ -103,6 +111,7 @@ namespace YARG
         {
             SettingsManager.LoadSettings();
             InputManager.Initialize();
+            InputManager.MenuInput += OnMenuInput;
 
             LoadScene(SceneIndex.Menu);
         }
@@ -133,6 +142,7 @@ namespace YARG
 
         protected override void SingletonDestroy()
         {
+            InputManager.MenuInput -= OnMenuInput;
             SettingsManager.SaveSettings();
             PlayerContainer.SaveProfiles();
             PlaylistContainer.SaveAll();
@@ -148,6 +158,46 @@ namespace YARG
             // Set alpha fading (on the tracks) to off
             Shader.SetGlobalFloat("_IsFading", 0f);
 #endif
+        }
+
+        private void OnMenuInput(YargPlayer _, ref GameInput input)
+        {
+            if (!input.Button || Time.unscaledTime < _nextVolumeShortcutTime)
+            {
+                return;
+            }
+
+            float volume = SettingsManager.Settings.MasterMusicVolume.Value;
+            switch ((MenuAction) input.Action)
+            {
+                case MenuAction.VolumeUp:
+                    volume += VOLUME_SHORTCUT_STEP;
+                    break;
+                case MenuAction.VolumeDown:
+                    volume -= VOLUME_SHORTCUT_STEP;
+                    break;
+                default:
+                    return;
+            }
+
+            volume = Mathf.Clamp01(volume);
+            if (Mathf.Approximately(volume, SettingsManager.Settings.MasterMusicVolume.Value))
+            {
+                return;
+            }
+
+            SettingsManager.Settings.MasterMusicVolume.Value = volume;
+            _nextVolumeShortcutTime = Time.unscaledTime + VOLUME_SHORTCUT_COOLDOWN;
+
+            CancelInvoke(nameof(SaveVolumeShortcutSettings));
+            Invoke(nameof(SaveVolumeShortcutSettings), VOLUME_SHORTCUT_SAVE_DELAY);
+
+            ToastManager.ToastInformation(Localize.KeyFormat("Menu.Toast.MasterVolume", Localize.Percent(volume)));
+        }
+
+        private void SaveVolumeShortcutSettings()
+        {
+            SettingsManager.SaveSettings();
         }
 
         private async void LoadSceneAdditive(SceneIndex scene)

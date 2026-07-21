@@ -222,7 +222,8 @@
             "ResumeAfterFailInvalidate": "Score saving disabled: Resuming after failure invalidated score.",
             "ProfileCreated": "Profile created for new device: {0}\nTime to do some YARGin!",
             "TooManyPauses": "Score saving disabled: Too many pauses.",
-            "UnsupportedDevice": "Automatic profile creation is not supported for {0}!"
+            "UnsupportedDevice": "Automatic profile creation is not supported for {0}!",
+            "MasterVolume": "Master volume: {0}"
         },
         "Dialog": {
             "DontShowAgain": "Don't Show Again",
@@ -869,7 +870,9 @@
             "Left": "Left",
             "Right": "Right",
             "Start": "Start (Pause)",
-            "Select": "Select"
+            "Select": "Select",
+            "VolumeUp": "Volume Up",
+            "VolumeDown": "Volume Down"
         },
         "FiveFret": {
             "Green": "Green Fret (First)",
