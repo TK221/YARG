@@ -42,6 +42,7 @@ namespace YARG.Menu.Persistent
         private Sprite _iconError;
 
         private static readonly Queue<ToastInfo> _toastQueue = new();
+        private readonly Dictionary<string, Toast> _activeToastsByKey = new();
 
         private enum ToastType
         {
@@ -57,12 +58,14 @@ namespace YARG.Menu.Persistent
             public readonly ToastType Type;
             public readonly string Text;
             public readonly Action OnClick;
+            public readonly string ReplacementKey;
 
-            public ToastInfo(ToastType type, string text, Action onClick)
+            public ToastInfo(ToastType type, string text, Action onClick, string replacementKey)
             {
-                Type = type;
-                Text = text;
-                OnClick = onClick;
+                Type           = type;
+                Text           = text;
+                OnClick        = onClick;
+                ReplacementKey = replacementKey;
             }
         }
 
@@ -81,7 +84,7 @@ namespace YARG.Menu.Persistent
 
             while (transform.childCount < MAX_TOAST_COUNT && _toastQueue.TryDequeue(out var toast))
             {
-                ShowToast(toast.Type, toast.Text, toast.OnClick);
+                ShowToast(toast);
             }
         }
 
@@ -90,44 +93,67 @@ namespace YARG.Menu.Persistent
         /// </summary>
         /// <param name="text">Text of the toast.</param>
         /// <param name="onClick">Action to perform when the toast is clicked.</param>
-        public static void ToastMessage(string text, Action onClick = null)
-            => AddToast(ToastType.General, text, onClick);
+        public static void ToastMessage(string text, Action onClick = null, string replacementKey = null)
+            => AddToast(ToastType.General, text, onClick, replacementKey);
 
         /// <summary>
         /// Adds an information message toast to the toast queue.
         /// </summary>
         /// <param name="text">Text of the toast.</param>
         /// <param name="onClick">Action to perform when the toast is clicked.</param>
-        public static void ToastInformation(string text, Action onClick = null)
-            => AddToast(ToastType.Information, text, onClick);
+        public static void ToastInformation(string text, Action onClick = null, string replacementKey = null)
+            => AddToast(ToastType.Information, text, onClick, replacementKey);
 
         /// <summary>
         /// Adds a success message toast to the toast queue.
         /// </summary>
         /// <param name="text">Text of the toast.</param>
         /// <param name="onClick">Action to perform when the toast is clicked.</param>
-        public static void ToastSuccess(string text, Action onClick = null)
-            => AddToast(ToastType.Success, text, onClick);
+        public static void ToastSuccess(string text, Action onClick = null, string replacementKey = null)
+            => AddToast(ToastType.Success, text, onClick, replacementKey);
 
         /// <summary>
         /// Adds a warning message toast to the toast queue.
         /// </summary>
         /// <param name="text">Text of the toast.</param>
         /// <param name="onClick">Action to perform when the toast is clicked.</param>
-        public static void ToastWarning(string text, Action onClick = null)
-            => AddToast(ToastType.Warning, text, onClick);
+        public static void ToastWarning(string text, Action onClick = null, string replacementKey = null)
+            => AddToast(ToastType.Warning, text, onClick, replacementKey);
 
         /// <summary>
         /// Adds an error message toast to the toast queue.
         /// </summary>
         /// <param name="text">Text of the toast.</param>
         /// <param name="onClick">Action to perform when the toast is clicked.</param>
-        public static void ToastError(string text, Action onClick = null)
-            => AddToast(ToastType.Error, text, onClick);
+        public static void ToastError(string text, Action onClick = null, string replacementKey = null)
+            => AddToast(ToastType.Error, text, onClick, replacementKey);
 
-        private static void AddToast(ToastType type, string text, Action onClick)
+        private static void AddToast(ToastType type, string text, Action onClick, string replacementKey)
         {
-            _toastQueue.Enqueue(new ToastInfo(type, text, onClick));
+            if (!string.IsNullOrEmpty(replacementKey))
+            {
+                RemoveQueuedToasts(replacementKey);
+
+                if (Instance != null && Instance.TryUpdateToast(replacementKey, type, text, onClick))
+                {
+                    return;
+                }
+            }
+
+            _toastQueue.Enqueue(new ToastInfo(type, text, onClick, replacementKey));
+        }
+
+        private static void RemoveQueuedToasts(string replacementKey)
+        {
+            int count = _toastQueue.Count;
+            for (int i = 0; i < count; i++)
+            {
+                var toast = _toastQueue.Dequeue();
+                if (toast.ReplacementKey != replacementKey)
+                {
+                    _toastQueue.Enqueue(toast);
+                }
+            }
         }
 
         private void EnsureTopmostCanvas()
@@ -146,10 +172,45 @@ namespace YARG.Menu.Persistent
                 gameObject.AddComponent<GraphicRaycaster>();
         }
 
-        private void ShowToast(ToastType type, string body, Action onClick)
+        private bool TryUpdateToast(string replacementKey, ToastType type, string body, Action onClick)
         {
-            // Get properties for this message type
-            var (text, color, icon) = type switch
+            if (!_activeToastsByKey.TryGetValue(replacementKey, out var toast) || toast == null)
+            {
+                _activeToastsByKey.Remove(replacementKey);
+                return false;
+            }
+
+            var (title, color, icon) = GetToastVisuals(type);
+            toast.UpdateToast(title, body, icon, color, onClick);
+            return true;
+        }
+
+        private void ShowToast(ToastInfo toastInfo)
+        {
+            var (title, color, icon) = GetToastVisuals(toastInfo.Type);
+
+            var toast = Instantiate(_toastPrefab, transform);
+            toast.Initialize(title, toastInfo.Text, icon, color, toastInfo.OnClick, OnToastDestroyed);
+
+            if (!string.IsNullOrEmpty(toastInfo.ReplacementKey))
+            {
+                _activeToastsByKey[toastInfo.ReplacementKey] = toast;
+            }
+
+            void OnToastDestroyed(Toast destroyedToast)
+            {
+                if (!string.IsNullOrEmpty(toastInfo.ReplacementKey) &&
+                    _activeToastsByKey.TryGetValue(toastInfo.ReplacementKey, out var activeToast) &&
+                    activeToast == destroyedToast)
+                {
+                    _activeToastsByKey.Remove(toastInfo.ReplacementKey);
+                }
+            }
+        }
+
+        private (string title, Color color, Sprite icon) GetToastVisuals(ToastType type)
+        {
+            return type switch
             {
                 ToastType.General     => ("General",     _generalColor,     _iconGeneral),
                 ToastType.Information => ("Information", _informationColor, _iconInformation),
@@ -158,9 +219,6 @@ namespace YARG.Menu.Persistent
                 ToastType.Error       => ("Error",       _errorColor,       _iconError),
                 _ => throw new ArgumentException($"Invalid toast type {type}!")
             };
-
-            var toast = Instantiate(_toastPrefab, transform);
-            toast.Initialize(text, body, icon, color, onClick);
         }
     }
 }

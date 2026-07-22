@@ -29,8 +29,38 @@ namespace YARG.Menu.Persistent
         private bool _canInteract;
         private Coroutine _coroutine;
         private Action _onClick;
+        private Action<Toast> _onDestroyed;
 
-        public void Initialize(string type, string message, Sprite icon, Color color, Action onClick)
+        public void Initialize(string type, string message, Sprite icon, Color color, Action onClick, Action<Toast> onDestroyed)
+        {
+            _onDestroyed = onDestroyed;
+            SetContents(type, message, icon, color, onClick);
+
+            _coroutine = StartCoroutine(ToastStartCoroutine());
+        }
+
+        public void UpdateToast(string type, string message, Sprite icon, Color color, Action onClick)
+        {
+            SetContents(type, message, icon, color, onClick);
+
+            if (_coroutine != null)
+            {
+                StopCoroutine(_coroutine);
+            }
+
+            _canvasGroup.DOKill();
+            _canvasGroup.alpha = 1f;
+            transform.DOKill();
+
+            var scale = transform.localScale;
+            scale.y = 1f;
+            transform.localScale = scale;
+
+            _canInteract = true;
+            _coroutine = StartCoroutine(ToastWaitCoroutine());
+        }
+
+        private void SetContents(string type, string message, Sprite icon, Color color, Action onClick)
         {
             _background.color = color;
 
@@ -42,8 +72,6 @@ namespace YARG.Menu.Persistent
             _message.text = message;
 
             _onClick = onClick;
-
-            _coroutine = StartCoroutine(ToastStartCoroutine());
         }
 
         private IEnumerator ToastStartCoroutine()
@@ -59,10 +87,12 @@ namespace YARG.Menu.Persistent
 
             _canInteract = true;
 
-            // Wait
-            yield return new WaitForSecondsRealtime(5f);
+            yield return ToastWaitCoroutine();
+        }
 
-            // Toast
+        private IEnumerator ToastWaitCoroutine()
+        {
+            yield return new WaitForSecondsRealtime(5f);
             yield return ToastEndCoroutine();
         }
 
@@ -91,6 +121,11 @@ namespace YARG.Menu.Persistent
                 .WaitForCompletion();
 
             Destroy(gameObject);
+        }
+
+        private void OnDestroy()
+        {
+            _onDestroyed?.Invoke(this);
         }
 
         public void OnPointerClick(PointerEventData eventData)

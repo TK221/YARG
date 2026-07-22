@@ -10,6 +10,8 @@ namespace YARG.Input
         {
             new ButtonBinding("Menu.Start",  (int) MenuAction.Start),
             new ButtonBinding("Menu.Select", (int) MenuAction.Select),
+            new ButtonBinding("Menu.VolumeUp", (int) MenuAction.VolumeUp),
+            new ButtonBinding("Menu.VolumeDown", (int) MenuAction.VolumeDown),
 
             new ButtonBinding("Menu.Green",  (int) MenuAction.Green),
             new ButtonBinding("Menu.Red",    (int) MenuAction.Red),
