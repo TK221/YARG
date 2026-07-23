@@ -371,7 +371,10 @@ namespace YARG.Menu.MusicLibrary
             if (voteInputsActive)
             {
                 greenEntry = new NavigationScheme.Entry(MenuAction.Green,
-                    "Menu.MusicLibrary.SongVote.Approve", ApproveSong);
+                    "Menu.MusicLibrary.SongVote.ApproveHoldPlay",
+                    ApproveSong,
+                    onHoldHandler: PlaySongWithoutVote,
+                    holdSeconds: GREEN_HOLD_SECONDS);
                 redEntry = new NavigationScheme.Entry(MenuAction.Red,
                     "Menu.MusicLibrary.SongVote.Deny", DenySong);
             }
@@ -1114,6 +1117,16 @@ namespace YARG.Menu.MusicLibrary
         private void DenySong(NavigationContext context)
         {
             VoteOnSong(context.Player, SongVote.Deny);
+        }
+
+        private void PlaySongWithoutVote(NavigationContext _)
+        {
+            if (!IsSongVoteInputActive())
+            {
+                return;
+            }
+
+            LaunchSelectedVotedSong();
         }
 
         private void VoteOnSong(YargPlayer player, SongVote vote)
