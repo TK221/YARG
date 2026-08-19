@@ -886,6 +886,7 @@ GameObject:
   - component: {fileID: 3357471316197645111}
   - component: {fileID: 6708243923115141855}
   - component: {fileID: 7602362743166272758}
+  - component: {fileID: 5002153325775211175}
   m_Layer: 5
   m_Name: Difficulties Display
   m_TagString: Untagged
@@ -1038,6 +1039,22 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &5002153325775211175
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1075743806509257609}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b4b3e0a993b4ac6b5cda3f658878c78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::YARG.Menu.MusicLibrary.SongDifficultyDisplay
+  _display: {fileID: 1075743806509257609}
+  _difficultyRingsTopContainer: {fileID: 6767025792418765909}
+  _difficultyRingsBottomContainer: {fileID: 2771048302173638153}
+  _difficultyRingPrefab: {fileID: 1575055953060588012, guid: 53438a07c6e5ec5409d5bde8514761ca, type: 3}
 --- !u!1 &1080319921982148494
 GameObject:
   m_ObjectHideFlags: 0

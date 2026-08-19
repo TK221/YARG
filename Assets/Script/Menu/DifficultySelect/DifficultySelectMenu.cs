@@ -17,6 +17,7 @@ using YARG.Localization;
 using YARG.Menu.Navigation;
 using YARG.Menu.Persistent;
 using YARG.Menu.Filters;
+using YARG.Menu.MusicLibrary;
 using YARG.Player;
 using YARG.Song;
 
@@ -62,6 +63,8 @@ namespace YARG.Menu.DifficultySelect
         private TextMeshProUGUI _artistText;
         [SerializeField]
         private Image _sourceIcon;
+        [SerializeField]
+        private SongDifficultyDisplay _songDifficultyDisplay;
 
         [Space]
         [SerializeField]
@@ -154,6 +157,7 @@ namespace YARG.Menu.DifficultySelect
 
             _sourceIcon.sprite = SongSources.SourceToIcon(GlobalVariables.State.CurrentSong.Source);
             _sourceIcon.gameObject.SetActive(_sourceIcon.sprite != null);
+            _songDifficultyDisplay?.SetSong(GlobalVariables.State.CurrentSong);
 
             _scrollRect = GetComponentInChildren<ScrollRect>();
             _scrollbar = GetComponentInChildren<Scrollbar>();
